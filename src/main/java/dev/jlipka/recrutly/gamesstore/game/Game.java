@@ -31,11 +31,11 @@ public class Game {
     private String description;
 
     @OneToMany(mappedBy = "baseGame")
-    private Set<Game> dlcs;
+    private Set<Game> dlcs = new HashSet<>();
 
     @ManyToOne
-    @JoinColumn(name = "base_game_id")
-    private Game baseGame;
+    @JoinColumn(name = "base_game_id", nullable = true)
+    private Game baseGame = null;
 
     @ManyToOne
     @JoinColumn(name = "publisher_id")
@@ -43,10 +43,10 @@ public class Game {
 
     private LocalDate releaseDate;
 
-    private BigDecimal avgRating;
+    private BigDecimal avgRating = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "game")
-    private List<Review> reviews;
+    private Set<Review> reviews = new HashSet<>();
 
     private BigDecimal basePrice;
 
@@ -54,14 +54,12 @@ public class Game {
 
     private LocalDateTime discountedUntil;
 
-    private int reviewCount;
+    private int reviewCount = 0;
 
-    private boolean isActive;
+    private boolean isActive = false;
 
     @Enumerated(value = EnumType.STRING)
     private ReleaseStatusType releaseStatus;
-
-
 
     @ManyToMany
     @JoinTable(
@@ -176,11 +174,11 @@ public class Game {
         this.avgRating = avgRating;
     }
 
-    public List<Review> getReviews() {
+    public Set<Review> getReviews() {
         return reviews;
     }
 
-    public void setReviews(List<Review> reviews) {
+    public void setReviews(Set<Review> reviews) {
         this.reviews = reviews;
     }
 
@@ -262,5 +260,13 @@ public class Game {
 
     public void setGenres(Set<Genre> genres) {
         this.genres = genres;
+    }
+
+    public Set<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(Set<Tag> tags) {
+        this.tags = tags;
     }
 }
