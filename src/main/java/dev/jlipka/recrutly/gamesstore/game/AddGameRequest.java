@@ -1,28 +1,54 @@
 package dev.jlipka.recrutly.gamesstore.game;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
 public class AddGameRequest {
 
+    @NotNull
+    @Size(max = 255)
     private final String name;
+
+    @NotNull
+    @Size(max = 255)
     private final String developer;
+
+    @NotNull
+    @Size(max = 8000)
     private final String description;
 
     private final Long baseGameId;
 
+    @NotNull
+    @Size(max = 255)
     private final String publisher;
 
     private final LocalDate releaseDate;
 
+    @Positive
     private final BigDecimal basePrice;
 
-    private final Set<String> genres;
-    private final Set<String> platforms;
-    private final Set<String> languages;
-    private final Set<String> tags;
-    private final Set<String> features;
+    @Valid
+    Set<@NotBlank(message = "Genre cannot be blank") String> genres;
+
+    @Valid
+    Set<@NotBlank(message = "Platform cannot be blank") @Size(max = 255) String> platforms;
+
+    @Valid
+    Set<@NotBlank(message = "Language cannot be blank") @Size(max = 255) String> languages;
+
+    @Valid
+    Set<@NotBlank(message = "Feature cannot be blank") @Size(max = 255) String> features;
+
+    @Valid
+    Set<@NotBlank(message = "Tag cannot be blank") @Size(max = 255) String> tags;
 
 
     public AddGameRequest(String name,

@@ -12,11 +12,17 @@ import dev.jlipka.recrutly.gamesstore.game.publisher.Publisher;
 import dev.jlipka.recrutly.gamesstore.game.publisher.PublisherService;
 import dev.jlipka.recrutly.gamesstore.game.tag.Tag;
 import dev.jlipka.recrutly.gamesstore.game.tag.TagService;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class GameService {
@@ -39,6 +45,16 @@ public class GameService {
         this.platformService = platformService;
         this.publisherService = publisherService;
         this.tagService = tagService;
+    }
+
+
+    public List<Game> findAll() {
+        return gameRepository.findAll();
+    }
+
+
+    public Optional<Game> find(Long id) {
+        return gameRepository.findById(id);
     }
 
 
@@ -90,6 +106,7 @@ public class GameService {
         game.setDescription(request.getDescription());
         game.setName(request.getName());
         game.setDeveloper(request.getDeveloper());
+        game.setBasePrice(request.getBasePrice());
 
         game.setReleaseDate(request.getReleaseDate());
 
@@ -103,6 +120,21 @@ public class GameService {
 
 
         return gameRepository.save(game);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+
+        Game game = gameRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No game with given id"));
+
+        game.getFeatures().clear();
+        game.getTags().clear();
+        game.getGenres().clear();
+        game.getPlatforms().clear();
+        game.getLanguages().clear();
+
+        gameRepository.delete(game);
     }
 
 
