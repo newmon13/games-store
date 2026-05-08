@@ -16,6 +16,7 @@ public class Language {
     @ManyToMany(mappedBy = "languages")
     private Set<Game> games;
 
+    @Column(unique = true)
     private String name;
 
     public void setId(Long id) {
@@ -24,5 +25,13 @@ public class Language {
 
     public Long getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
