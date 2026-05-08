@@ -13,11 +13,11 @@ public class Feature {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
+    private String name;
+
     @ManyToMany(mappedBy = "features")
     private Set<Game> games;
-
-
-    private String name;
 
     public void setId(Long id) {
         this.id = id;
@@ -27,4 +27,11 @@ public class Feature {
         return id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
