@@ -1,0 +1,237 @@
+package dev.jlipka.recrutly.gamesstore.game;
+
+import dev.jlipka.recrutly.gamesstore.game.feature.Feature;
+import dev.jlipka.recrutly.gamesstore.game.feature.FeatureService;
+import dev.jlipka.recrutly.gamesstore.game.genre.Genre;
+import dev.jlipka.recrutly.gamesstore.game.genre.GenreService;
+import dev.jlipka.recrutly.gamesstore.game.language.Language;
+import dev.jlipka.recrutly.gamesstore.game.language.LanguageService;
+import dev.jlipka.recrutly.gamesstore.game.platform.Platform;
+import dev.jlipka.recrutly.gamesstore.game.platform.PlatformService;
+import dev.jlipka.recrutly.gamesstore.game.publisher.Publisher;
+import dev.jlipka.recrutly.gamesstore.game.publisher.PublisherService;
+import dev.jlipka.recrutly.gamesstore.game.tag.Tag;
+import dev.jlipka.recrutly.gamesstore.game.tag.TagService;
+import dev.jlipka.recrutly.gamesstore.infra.error.ErrorCode;
+import dev.jlipka.recrutly.gamesstore.infra.error.GamesStoreException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
+
+import static dev.jlipka.recrutly.gamesstore.game.GameMapper.mapGameToFullDetailsDto;
+import static dev.jlipka.recrutly.gamesstore.game.GameMapper.mapGameToGameAdminFullDetailsDto;
+
+@Service
+public class GameService {
+
+    private static final int DAYS_GAME_REMAIN_NEW = 30;
+
+    private final GameRepository gameRepository;
+    private final FeatureService featureService;
+    private final GenreService genreService;
+    private final LanguageService languageService;
+    private final PlatformService platformService;
+    private final PublisherService publisherService;
+    private final TagService tagService;
+
+
+    public GameService(GameRepository gameRepository, FeatureService featureService, GenreService genreService, LanguageService languageService, PlatformService platformService, PublisherService publisherService, TagService tagService) {
+        this.gameRepository = gameRepository;
+        this.featureService = featureService;
+        this.genreService = genreService;
+        this.languageService = languageService;
+        this.platformService = platformService;
+        this.publisherService = publisherService;
+        this.tagService = tagService;
+    }
+
+
+    public List<GameListingDto> getAllGameListings() {
+
+        List<Game> games = gameRepository.findAll();
+        return games.stream().map(GameMapper::mapGameToGameListingItemDto).toList();
+
+    }
+
+    public GameAdminFullDetailsDto add(GameAddRequestDto request) {
+
+        Game game = new Game();
+
+        request.getFeatures().forEach(feature -> {
+            String normalized = normalizeName(feature);
+
+            Feature orCreate = featureService.findOrCreate(normalized);
+            game.getFeatures().add(orCreate);
+        });
+
+        request.getGenres().forEach(genre   -> {
+            String normalized = normalizeName(genre);
+
+            Genre orCreate = genreService.findOrCreate(normalized);
+            game.getGenres().add(orCreate);
+        });
+
+        request.getLanguages().forEach(language   -> {
+            String normalized = normalizeName(language);
+
+            Language orCreate = languageService.findOrCreate(normalized);
+            game.getLanguages().add(orCreate);
+        });
+
+        request.getPlatforms().forEach(platform   -> {
+            String normalized = normalizeName(platform);
+
+            Platform orCreate = platformService.findOrCreate(normalized);
+            game.getPlatforms().add(orCreate);
+        });
+
+        request.getTags().forEach(tag   -> {
+            String normalized = normalizeName(tag);
+            Tag orCreate = tagService.findOrCreate(normalized);
+            game.getTags().add(orCreate);
+        });
+
+
+        String publisher = request.getPublisher();
+        String normalized = normalizeName(publisher);
+        Publisher orCreate = publisherService.findOrCreate(normalized);
+        game.setPublisher(orCreate);
+
+
+        game.setDescription(request.getDescription());
+        game.setName(request.getName());
+        game.setDeveloper(request.getDeveloper());
+        game.setBasePrice(request.getBasePrice());
+
+        game.setReleaseDate(request.getReleaseDate());
+
+        if (request.getBaseGameId() != null) {
+            gameRepository.findById(request.getBaseGameId())
+                    .ifPresent(game::setBaseGame);
+        }
+
+        ReleaseStatusType releaseStatusType = calculateReleaseStatusType(request.getReleaseDate());
+        game.setReleaseStatus(releaseStatusType);
+
+
+        Game save = gameRepository.save(game);
+        return mapGameToGameAdminFullDetailsDto(save);
+    }
+
+    public GameAdminFullDetailsDto update(GameUpdateRequestDto request, Long id) {
+        Optional<Game> byId = gameRepository.findById(id);
+
+        if (byId.isEmpty()) {
+            throw new GamesStoreException(ErrorCode.GAME_NOT_FOUND);
+        }
+
+        Game game = byId.get();
+
+        if (request.getName() != null) game.setName(request.getName());
+        if (request.getDeveloper() != null) game.setDeveloper(request.getDeveloper());
+        if (request.getDescription() != null) game.setDescription(request.getDescription());
+        if (request.getBasePrice() != null) game.setBasePrice(request.getBasePrice());
+
+
+        if (request.getDiscountedPrice() != null) {
+            BigDecimal basePriceToCompare;
+
+            if (request.getBasePrice() != null) {
+                basePriceToCompare = request.getBasePrice();
+            } else {
+                basePriceToCompare = game.getBasePrice();
+            }
+
+            if (request.getDiscountedPrice().compareTo(basePriceToCompare) >= 0) {
+                throw new GamesStoreException(ErrorCode.INVALID_DISCOUNTED_PRICE);
+            }
+
+            game.setDiscountedPrice(request.getDiscountedPrice());
+        }
+        if (request.getDiscountedUntil() != null) game.setDiscountedUntil(request.getDiscountedUntil());
+
+        if (request.getReleaseDate() != null) {
+            game.setReleaseDate(request.getReleaseDate());
+            game.setReleaseStatus(calculateReleaseStatusType(request.getReleaseDate()));
+        }
+        if (request.getPublisher() != null) {
+            Publisher publisher = publisherService.findOrCreate(normalizeName(request.getPublisher()));
+            game.setPublisher(publisher);
+        }
+        if (request.getGenres() != null) {
+            game.getGenres().clear();
+            request.getGenres().forEach(genre -> {
+                game.getGenres().add(genreService.findOrCreate(normalizeName(genre)));
+            });
+        }
+
+        Game save = gameRepository.save(game);
+        return mapGameToGameAdminFullDetailsDto(save);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+
+        Optional<Game> byId = gameRepository.findById(id);
+
+        if (byId.isEmpty()) {
+            throw new GamesStoreException(ErrorCode.GAME_NOT_FOUND);
+        }
+
+        Game game = byId.get();
+
+        game.getFeatures().clear();
+        game.getTags().clear();
+        game.getGenres().clear();
+        game.getPlatforms().clear();
+        game.getLanguages().clear();
+
+        gameRepository.delete(game);
+    }
+
+
+    private ReleaseStatusType calculateReleaseStatusType(LocalDate releaseDate) {
+
+        LocalDate today = LocalDate.now();
+
+        if (releaseDate.isAfter(today)) {
+            return ReleaseStatusType.UPCOMING;
+        }
+
+        long days = daysBetweenInclusive(releaseDate, today);
+
+        if (days < DAYS_GAME_REMAIN_NEW) {
+            return ReleaseStatusType.NEW;
+        }
+
+        if (releaseDate.isBefore(today)) {
+            return ReleaseStatusType.RELEASED;
+        }
+
+        return ReleaseStatusType.UNKNOWN;
+    }
+
+    private long daysBetweenInclusive(LocalDate ld1, LocalDate ld2) {
+        return Math.abs(ChronoUnit.DAYS.between(ld1, ld2)) + 1;
+    }
+
+    private String normalizeName(String value) {
+        return StringUtils.capitalize(value.trim().toLowerCase());
+    }
+
+    public GameFullDetailsDto getGameFullDetails(Long id) {
+        Optional<Game> byId = gameRepository.findById(id);
+
+        if (byId.isEmpty()) {
+            throw new GamesStoreException(ErrorCode.GAME_NOT_FOUND);
+        }
+
+        return mapGameToFullDetailsDto(byId.get());
+    }
+}
