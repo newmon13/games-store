@@ -12,17 +12,14 @@ import dev.jlipka.recrutly.gamesstore.game.publisher.Publisher;
 import dev.jlipka.recrutly.gamesstore.game.publisher.PublisherService;
 import dev.jlipka.recrutly.gamesstore.game.tag.Tag;
 import dev.jlipka.recrutly.gamesstore.game.tag.TagService;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class GameService {
@@ -52,13 +49,20 @@ public class GameService {
         return gameRepository.findAll();
     }
 
+    public List<GameListingDto> getAllGameListings() {
+
+        List<Game> games = gameRepository.findAll();
+        return games.stream().map(GameMapper::mapGameToGameListingItemDto).toList();
+
+    }
+
 
     public Optional<Game> find(Long id) {
         return gameRepository.findById(id);
     }
 
 
-    public Game add(AddGameRequest request) {
+    public Game add(GameAddRequestDto request) {
 
         Game game = new Game();
 
@@ -165,5 +169,15 @@ public class GameService {
 
     private String normalizeName(String value) {
         return StringUtils.capitalize(value.trim().toLowerCase());
+    }
+
+    public GameFullDetailsDto getGameFullDetails(Long id) {
+        Optional<Game> byId = gameRepository.findById(id);
+
+        if (byId.isPresent()) {
+            return GameMapper.mapGameToFullDetailsDto(byId.get());
+        } else {
+            throw new RuntimeException("No game with given id");
+        }
     }
 }
