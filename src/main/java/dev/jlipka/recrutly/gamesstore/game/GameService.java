@@ -12,6 +12,8 @@ import dev.jlipka.recrutly.gamesstore.game.publisher.Publisher;
 import dev.jlipka.recrutly.gamesstore.game.publisher.PublisherService;
 import dev.jlipka.recrutly.gamesstore.game.tag.Tag;
 import dev.jlipka.recrutly.gamesstore.game.tag.TagService;
+import dev.jlipka.recrutly.gamesstore.infra.error.ErrorCode;
+import dev.jlipka.recrutly.gamesstore.infra.error.GamesStoreException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -20,6 +22,8 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+
+import static dev.jlipka.recrutly.gamesstore.game.GameMapper.mapGameToFullDetailsDto;
 
 @Service
 public class GameService {
@@ -175,9 +179,9 @@ public class GameService {
         Optional<Game> byId = gameRepository.findById(id);
 
         if (byId.isPresent()) {
-            return GameMapper.mapGameToFullDetailsDto(byId.get());
+            return mapGameToFullDetailsDto(byId.get());
         } else {
-            throw new RuntimeException("No game with given id");
+            throw new GamesStoreException(ErrorCode.GAME_NOT_FOUND);
         }
     }
 }
