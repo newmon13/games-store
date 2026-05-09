@@ -36,7 +36,9 @@ public class GameMapper {
 
         gameFullDetailsDto.setDlcs(dlcs);
 
-        gameFullDetailsDto.setBaseGame(mapGameToGameReferenceDto(game.getBaseGame()));
+        if (game.getBaseGame() != null) {
+            gameFullDetailsDto.setBaseGame(mapGameToGameReferenceDto(game.getBaseGame()));
+        }
         gameFullDetailsDto.setPublisher(game.getPublisher().getName());
         gameFullDetailsDto.setReleaseDate(game.getReleaseDate());
         gameFullDetailsDto.setAvgRating(game.getAvgRating());
