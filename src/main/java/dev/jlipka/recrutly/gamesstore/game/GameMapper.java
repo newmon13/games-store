@@ -57,6 +57,42 @@ public class GameMapper {
         return gameFullDetailsDto;
     }
 
+    public static GameAdminFullDetailsDto mapGameToGameAdminFullDetailsDto(Game game) {
+
+        GameAdminFullDetailsDto gameAdminFullDetailsDto = new GameAdminFullDetailsDto();
+        gameAdminFullDetailsDto.setId(game.getId());
+        gameAdminFullDetailsDto.setName(game.getName());
+        gameAdminFullDetailsDto.setDeveloper(game.getDeveloper());
+        gameAdminFullDetailsDto.setDescription(game.getDescription());
+
+
+        List<GameReferenceDto> dlcs = game.getDlcs().stream().map(GameMapper::mapGameToGameReferenceDto).toList();
+
+        gameAdminFullDetailsDto.setDlcs(dlcs);
+
+        if (game.getBaseGame() != null) {
+            gameAdminFullDetailsDto.setBaseGame(mapGameToGameReferenceDto(game.getBaseGame()));
+        }
+        gameAdminFullDetailsDto.setPublisher(game.getPublisher().getName());
+        gameAdminFullDetailsDto.setReleaseDate(game.getReleaseDate());
+        gameAdminFullDetailsDto.setAvgRating(game.getAvgRating());
+        gameAdminFullDetailsDto.setReviews(game.getReviews().stream().map(GameMapper::mapReviewToReviewDto).toList());
+        gameAdminFullDetailsDto.setBasePrice(game.getBasePrice());
+        gameAdminFullDetailsDto.setDiscountedPrice(game.getDiscountedPrice());
+        gameAdminFullDetailsDto.setDiscountedUntil(game.getDiscountedUntil());
+        gameAdminFullDetailsDto.setReviewCount(game.getReviewCount());
+        gameAdminFullDetailsDto.setReleaseStatus(game.getReleaseStatus());
+        gameAdminFullDetailsDto.setFeatures(game.getFeatures().stream().map(Feature::getName).collect(Collectors.toSet()));
+        gameAdminFullDetailsDto.setTags(game.getTags().stream().map(Tag::getName).collect(Collectors.toSet()));
+        gameAdminFullDetailsDto.setPlatforms(game.getPlatforms().stream().map(Platform::getName).collect(Collectors.toSet()));
+        gameAdminFullDetailsDto.setGenres(game.getGenres().stream().map(Genre::getName).collect(Collectors.toSet()));
+        gameAdminFullDetailsDto.setLanguages(game.getLanguages().stream().map(Language::getName).collect(Collectors.toSet()));
+        gameAdminFullDetailsDto.setActive(gameAdminFullDetailsDto.isActive());
+
+
+        return gameAdminFullDetailsDto;
+    }
+
     public static GameReferenceDto mapGameToGameReferenceDto(Game game) {
 
         GameReferenceDto gameReferenceDto = new GameReferenceDto();

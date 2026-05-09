@@ -2,8 +2,7 @@ package dev.jlipka.recrutly.gamesstore.game;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
@@ -32,23 +31,23 @@ public class GameAddRequestDto {
 
     private final LocalDate releaseDate;
 
-    @Positive
+    @PositiveOrZero
     private final BigDecimal basePrice;
 
     @Valid
-    Set<@NotBlank(message = "Genre cannot be blank") String> genres;
+    private Set<@NotBlank(message = "Genre cannot be blank") String> genres;
 
     @Valid
-    Set<@NotBlank(message = "Platform cannot be blank") @Size(max = 255) String> platforms;
+    private Set<@NotBlank(message = "Platform cannot be blank") @Size(max = 255) String> platforms;
 
     @Valid
-    Set<@NotBlank(message = "Language cannot be blank") @Size(max = 255) String> languages;
+    private Set<@NotBlank(message = "Language cannot be blank") @Size(max = 255) String> languages;
 
     @Valid
-    Set<@NotBlank(message = "Feature cannot be blank") @Size(max = 255) String> features;
+    private Set<@NotBlank(message = "Feature cannot be blank") @Size(max = 255) String> features;
 
     @Valid
-    Set<@NotBlank(message = "Tag cannot be blank") @Size(max = 255) String> tags;
+    private Set<@NotBlank(message = "Tag cannot be blank") @Size(max = 255) String> tags;
 
 
     public GameAddRequestDto(String name,

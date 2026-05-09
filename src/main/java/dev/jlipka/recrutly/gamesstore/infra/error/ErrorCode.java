@@ -4,7 +4,10 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
     GAME_NOT_FOUND(1001, HttpStatus.NOT_FOUND),
-    GAME_ALREADY_EXISTS(1002, HttpStatus.CONFLICT);
+    GAME_ALREADY_EXISTS(1002, HttpStatus.CONFLICT),
+    INVALID_DISCOUNTED_PRICE(1003, HttpStatus.BAD_REQUEST)
+
+    ;
 
     private final int code;
     private final HttpStatus status;

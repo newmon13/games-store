@@ -18,12 +18,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
 import static dev.jlipka.recrutly.gamesstore.game.GameMapper.mapGameToFullDetailsDto;
+import static dev.jlipka.recrutly.gamesstore.game.GameMapper.mapGameToGameAdminFullDetailsDto;
 
 @Service
 public class GameService {
@@ -38,6 +40,7 @@ public class GameService {
     private final PublisherService publisherService;
     private final TagService tagService;
 
+
     public GameService(GameRepository gameRepository, FeatureService featureService, GenreService genreService, LanguageService languageService, PlatformService platformService, PublisherService publisherService, TagService tagService) {
         this.gameRepository = gameRepository;
         this.featureService = featureService;
@@ -49,10 +52,6 @@ public class GameService {
     }
 
 
-    public List<Game> findAll() {
-        return gameRepository.findAll();
-    }
-
     public List<GameListingDto> getAllGameListings() {
 
         List<Game> games = gameRepository.findAll();
@@ -60,13 +59,7 @@ public class GameService {
 
     }
 
-
-    public Optional<Game> find(Long id) {
-        return gameRepository.findById(id);
-    }
-
-
-    public Game add(GameAddRequestDto request) {
+    public GameAdminFullDetailsDto add(GameAddRequestDto request) {
 
         Game game = new Game();
 
@@ -127,14 +120,71 @@ public class GameService {
         game.setReleaseStatus(releaseStatusType);
 
 
-        return gameRepository.save(game);
+        Game save = gameRepository.save(game);
+        return mapGameToGameAdminFullDetailsDto(save);
+    }
+
+    public GameAdminFullDetailsDto update(GameUpdateRequestDto request, Long id) {
+        Optional<Game> byId = gameRepository.findById(id);
+
+        if (byId.isEmpty()) {
+            throw new GamesStoreException(ErrorCode.GAME_NOT_FOUND);
+        }
+
+        Game game = byId.get();
+
+        if (request.getName() != null) game.setName(request.getName());
+        if (request.getDeveloper() != null) game.setDeveloper(request.getDeveloper());
+        if (request.getDescription() != null) game.setDescription(request.getDescription());
+        if (request.getBasePrice() != null) game.setBasePrice(request.getBasePrice());
+
+
+        if (request.getDiscountedPrice() != null) {
+            BigDecimal basePriceToCompare;
+
+            if (request.getBasePrice() != null) {
+                basePriceToCompare = request.getBasePrice();
+            } else {
+                basePriceToCompare = game.getBasePrice();
+            }
+
+            if (request.getDiscountedPrice().compareTo(basePriceToCompare) >= 0) {
+                throw new GamesStoreException(ErrorCode.INVALID_DISCOUNTED_PRICE);
+            }
+
+            game.setDiscountedPrice(request.getDiscountedPrice());
+        }
+        if (request.getDiscountedUntil() != null) game.setDiscountedUntil(request.getDiscountedUntil());
+
+        if (request.getReleaseDate() != null) {
+            game.setReleaseDate(request.getReleaseDate());
+            game.setReleaseStatus(calculateReleaseStatusType(request.getReleaseDate()));
+        }
+        if (request.getPublisher() != null) {
+            Publisher publisher = publisherService.findOrCreate(normalizeName(request.getPublisher()));
+            game.setPublisher(publisher);
+        }
+        if (request.getGenres() != null) {
+            game.getGenres().clear();
+            request.getGenres().forEach(genre -> {
+                game.getGenres().add(genreService.findOrCreate(normalizeName(genre)));
+            });
+        }
+
+        Game save = gameRepository.save(game);
+        return mapGameToGameAdminFullDetailsDto(save);
     }
 
     @Transactional
     public void delete(Long id) {
 
-        Game game = gameRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No game with given id"));
+        Optional<Game> byId = gameRepository.findById(id);
+
+        if (byId.isEmpty()) {
+            throw new GamesStoreException(ErrorCode.GAME_NOT_FOUND);
+        }
+
+        Game game = byId.get();
 
         game.getFeatures().clear();
         game.getTags().clear();
@@ -178,10 +228,10 @@ public class GameService {
     public GameFullDetailsDto getGameFullDetails(Long id) {
         Optional<Game> byId = gameRepository.findById(id);
 
-        if (byId.isPresent()) {
-            return mapGameToFullDetailsDto(byId.get());
-        } else {
+        if (byId.isEmpty()) {
             throw new GamesStoreException(ErrorCode.GAME_NOT_FOUND);
         }
+
+        return mapGameToFullDetailsDto(byId.get());
     }
 }
