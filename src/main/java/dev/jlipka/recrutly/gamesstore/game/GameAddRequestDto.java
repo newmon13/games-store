@@ -10,23 +10,23 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
-public class AddGameRequest {
+public class GameAddRequestDto {
 
-    @NotNull
+    @NotBlank
     @Size(max = 255)
     private final String name;
 
-    @NotNull
+    @NotBlank
     @Size(max = 255)
     private final String developer;
 
-    @NotNull
+    @NotBlank
     @Size(max = 8000)
     private final String description;
 
     private final Long baseGameId;
 
-    @NotNull
+    @NotBlank
     @Size(max = 255)
     private final String publisher;
 
@@ -51,18 +51,18 @@ public class AddGameRequest {
     Set<@NotBlank(message = "Tag cannot be blank") @Size(max = 255) String> tags;
 
 
-    public AddGameRequest(String name,
-                          String developer,
-                          String description,
-                          Long baseGameId,
-                          String publisher,
-                          LocalDate releaseDate,
-                          BigDecimal basePrice,
-                          Set<String> genres,
-                          Set<String> platforms,
-                          Set<String> languages,
-                          Set<String> tags,
-                          Set<String> features) {
+    public GameAddRequestDto(String name,
+                             String developer,
+                             String description,
+                             Long baseGameId,
+                             String publisher,
+                             LocalDate releaseDate,
+                             BigDecimal basePrice,
+                             Set<String> genres,
+                             Set<String> platforms,
+                             Set<String> languages,
+                             Set<String> tags,
+                             Set<String> features) {
         this.name = name;
         this.developer = developer;
         this.description = description;
