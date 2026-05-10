@@ -1,10 +1,8 @@
 package dev.jlipka.recrutly.gamesstore.game;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +20,8 @@ public class GameController {
 
 
     @GetMapping
-    public ResponseEntity<List<GameListingDto>> getGames() {
-        List<GameListingDto> allGameListings = gameService.getAllGameListings();
+    public ResponseEntity<List<GameListingDto>> filterGames(@ModelAttribute @Valid GameFilterDto filterDto) {
+        List<GameListingDto> allGameListings = gameService.filter(filterDto);
         return ResponseEntity.of(Optional.of(allGameListings));
     }
 

@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 
 @Repository
-public interface GameRepository extends JpaRepository<Game, Long>{
+public interface GameRepository extends JpaRepository<Game, Long>, JpaSpecificationExecutor<Game>{
     boolean existsByNameAndDeveloperAndReleaseDate(String name, String developer, LocalDate releaseDate);
 }
