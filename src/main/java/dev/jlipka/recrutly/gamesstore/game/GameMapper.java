@@ -4,8 +4,6 @@ import dev.jlipka.recrutly.gamesstore.game.feature.Feature;
 import dev.jlipka.recrutly.gamesstore.game.genre.Genre;
 import dev.jlipka.recrutly.gamesstore.game.language.Language;
 import dev.jlipka.recrutly.gamesstore.game.platform.Platform;
-import dev.jlipka.recrutly.gamesstore.game.review.Review;
-import dev.jlipka.recrutly.gamesstore.game.review.ReviewDto;
 import dev.jlipka.recrutly.gamesstore.game.tag.Tag;
 
 import java.util.List;
@@ -42,7 +40,6 @@ public class GameMapper {
         gameFullDetailsDto.setPublisher(game.getPublisher().getName());
         gameFullDetailsDto.setReleaseDate(game.getReleaseDate());
         gameFullDetailsDto.setAvgRating(game.getAvgRating());
-        gameFullDetailsDto.setReviews(game.getReviews().stream().map(GameMapper::mapReviewToReviewDto).toList());
         gameFullDetailsDto.setBasePrice(game.getBasePrice());
         gameFullDetailsDto.setDiscountedPrice(game.getDiscountedPrice());
         gameFullDetailsDto.setDiscountedUntil(game.getDiscountedUntil());
@@ -76,7 +73,6 @@ public class GameMapper {
         gameAdminFullDetailsDto.setPublisher(game.getPublisher().getName());
         gameAdminFullDetailsDto.setReleaseDate(game.getReleaseDate());
         gameAdminFullDetailsDto.setAvgRating(game.getAvgRating());
-        gameAdminFullDetailsDto.setReviews(game.getReviews().stream().map(GameMapper::mapReviewToReviewDto).toList());
         gameAdminFullDetailsDto.setBasePrice(game.getBasePrice());
         gameAdminFullDetailsDto.setDiscountedPrice(game.getDiscountedPrice());
         gameAdminFullDetailsDto.setDiscountedUntil(game.getDiscountedUntil());
@@ -100,13 +96,5 @@ public class GameMapper {
         gameReferenceDto.setName(game.getName());
 
         return gameReferenceDto;
-    }
-
-    public static ReviewDto mapReviewToReviewDto(Review review) {
-        ReviewDto reviewDto = new ReviewDto();
-        reviewDto.setTitle(review.getTitle());
-        reviewDto.setDescription(review.getDescription());
-        reviewDto.setRating(review.getRating());
-        return reviewDto;
     }
 }

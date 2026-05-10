@@ -1,7 +1,5 @@
 package dev.jlipka.recrutly.gamesstore.game;
 
-import dev.jlipka.recrutly.gamesstore.game.review.ReviewDto;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -50,7 +48,6 @@ public class GameAdminFullDetailsDto {
 
     private Set<String> genres;
 
-    private List<ReviewDto> reviews;
 
     public Long getId() {
         return id;
@@ -212,11 +209,4 @@ public class GameAdminFullDetailsDto {
         this.genres = genres;
     }
 
-    public List<ReviewDto> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(List<ReviewDto> reviews) {
-        this.reviews = reviews;
-    }
 }

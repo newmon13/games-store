@@ -53,72 +53,81 @@ public class GameService {
 
 
     public List<GameListingDto> getAllGameListings() {
-
         List<Game> games = gameRepository.findAll();
         return games.stream().map(GameMapper::mapGameToGameListingItemDto).toList();
-
     }
 
     public GameAdminFullDetailsDto add(GameAddRequestDto request) {
+
+        if (gameRepository.existsByNameAndDeveloperAndReleaseDate(request.getName(),
+                request.getDeveloper(),
+                request.getReleaseDate())) {
+            throw new GamesStoreException(ErrorCode.GAME_ALREADY_EXISTS);
+        }
 
         Game game = new Game();
 
         request.getFeatures().forEach(feature -> {
             String normalized = normalizeName(feature);
-
             Feature orCreate = featureService.findOrCreate(normalized);
             game.getFeatures().add(orCreate);
         });
 
-        request.getGenres().forEach(genre   -> {
+        request.getGenres().forEach(genre -> {
             String normalized = normalizeName(genre);
-
             Genre orCreate = genreService.findOrCreate(normalized);
             game.getGenres().add(orCreate);
         });
 
-        request.getLanguages().forEach(language   -> {
+        request.getLanguages().forEach(language -> {
             String normalized = normalizeName(language);
-
             Language orCreate = languageService.findOrCreate(normalized);
             game.getLanguages().add(orCreate);
         });
 
-        request.getPlatforms().forEach(platform   -> {
+        request.getPlatforms().forEach(platform -> {
             String normalized = normalizeName(platform);
-
             Platform orCreate = platformService.findOrCreate(normalized);
             game.getPlatforms().add(orCreate);
         });
 
-        request.getTags().forEach(tag   -> {
+        request.getTags().forEach(tag -> {
             String normalized = normalizeName(tag);
             Tag orCreate = tagService.findOrCreate(normalized);
             game.getTags().add(orCreate);
         });
-
 
         String publisher = request.getPublisher();
         String normalized = normalizeName(publisher);
         Publisher orCreate = publisherService.findOrCreate(normalized);
         game.setPublisher(orCreate);
 
-
         game.setDescription(request.getDescription());
         game.setName(request.getName());
         game.setDeveloper(request.getDeveloper());
         game.setBasePrice(request.getBasePrice());
-
         game.setReleaseDate(request.getReleaseDate());
+        game.setActive(request.isActive());
+
+        if (request.getDiscountedPrice() != null) {
+            if (request.getDiscountedPrice().compareTo(request.getBasePrice()) >= 0) {
+                throw new GamesStoreException(ErrorCode.INVALID_DISCOUNTED_PRICE);
+            }
+            game.setDiscountedPrice(request.getDiscountedPrice());
+        }
+
+        if (request.getDiscountedUntil() != null) {
+            game.setDiscountedUntil(request.getDiscountedUntil());
+        }
 
         if (request.getBaseGameId() != null) {
-            gameRepository.findById(request.getBaseGameId())
-                    .ifPresent(game::setBaseGame);
+            Game baseGame = gameRepository.findById(request.getBaseGameId())
+                    .orElseThrow(() -> new GamesStoreException(ErrorCode.GAME_NOT_FOUND));
+            game.setBaseGame(baseGame);
         }
 
         ReleaseStatusType releaseStatusType = calculateReleaseStatusType(request.getReleaseDate());
         game.setReleaseStatus(releaseStatusType);
-
 
         Game save = gameRepository.save(game);
         return mapGameToGameAdminFullDetailsDto(save);
@@ -137,7 +146,7 @@ public class GameService {
         if (request.getDeveloper() != null) game.setDeveloper(request.getDeveloper());
         if (request.getDescription() != null) game.setDescription(request.getDescription());
         if (request.getBasePrice() != null) game.setBasePrice(request.getBasePrice());
-
+        if (request.getIsActive() != null) game.setActive(request.getIsActive());
 
         if (request.getDiscountedPrice() != null) {
             BigDecimal basePriceToCompare;
@@ -154,21 +163,53 @@ public class GameService {
 
             game.setDiscountedPrice(request.getDiscountedPrice());
         }
+
         if (request.getDiscountedUntil() != null) game.setDiscountedUntil(request.getDiscountedUntil());
 
         if (request.getReleaseDate() != null) {
             game.setReleaseDate(request.getReleaseDate());
             game.setReleaseStatus(calculateReleaseStatusType(request.getReleaseDate()));
         }
+
+        if (request.getBaseGameId() != null) {
+            Game baseGame = gameRepository.findById(request.getBaseGameId())
+                    .orElseThrow(() -> new GamesStoreException(ErrorCode.GAME_NOT_FOUND));
+            game.setBaseGame(baseGame);
+        }
+
         if (request.getPublisher() != null) {
             Publisher publisher = publisherService.findOrCreate(normalizeName(request.getPublisher()));
             game.setPublisher(publisher);
         }
+
         if (request.getGenres() != null) {
             game.getGenres().clear();
-            request.getGenres().forEach(genre -> {
-                game.getGenres().add(genreService.findOrCreate(normalizeName(genre)));
-            });
+            request.getGenres().forEach(genre ->
+                    game.getGenres().add(genreService.findOrCreate(normalizeName(genre))));
+        }
+
+        if (request.getTags() != null) {
+            game.getTags().clear();
+            request.getTags().forEach(tag ->
+                    game.getTags().add(tagService.findOrCreate(normalizeName(tag))));
+        }
+
+        if (request.getLanguages() != null) {
+            game.getLanguages().clear();
+            request.getLanguages().forEach(language ->
+                    game.getLanguages().add(languageService.findOrCreate(normalizeName(language))));
+        }
+
+        if (request.getPlatforms() != null) {
+            game.getPlatforms().clear();
+            request.getPlatforms().forEach(platform ->
+                    game.getPlatforms().add(platformService.findOrCreate(normalizeName(platform))));
+        }
+
+        if (request.getFeatures() != null) {
+            game.getFeatures().clear();
+            request.getFeatures().forEach(feature ->
+                    game.getFeatures().add(featureService.findOrCreate(normalizeName(feature))));
         }
 
         Game save = gameRepository.save(game);
