@@ -14,6 +14,7 @@ import dev.jlipka.recrutly.gamesstore.game.tag.Tag;
 import dev.jlipka.recrutly.gamesstore.game.tag.TagService;
 import dev.jlipka.recrutly.gamesstore.infra.error.ErrorCode;
 import dev.jlipka.recrutly.gamesstore.infra.error.GamesStoreException;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -24,8 +25,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
-import static dev.jlipka.recrutly.gamesstore.game.GameMapper.mapGameToFullDetailsDto;
-import static dev.jlipka.recrutly.gamesstore.game.GameMapper.mapGameToGameAdminFullDetailsDto;
+import static dev.jlipka.recrutly.gamesstore.game.GameMapper.*;
 
 @Service
 public class GameService {
@@ -49,6 +49,13 @@ public class GameService {
         this.platformService = platformService;
         this.publisherService = publisherService;
         this.tagService = tagService;
+    }
+
+    public List<GameListingDto> filter(GameFilterDto gameFilterDto) {
+        Specification<Game> gameSpecification = GameSpecification.fromFilter(gameFilterDto);
+        List<Game> games = gameRepository.findAll(gameSpecification);
+
+        return games.stream().map(GameMapper::mapGameToGameListingItemDto).toList();
     }
 
 

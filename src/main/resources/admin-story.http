@@ -56,7 +56,6 @@ Authorization: Basic admin admin
   "name": "The Witcher 3: Wild Hunt",
   "developer": "CD Projekt Red",
   "description": "Example description",
-  "dlcs": [],
   "baseGame": null,
   "publisher": "Cd projekt",
   "releaseDate": "2015-05-19",
@@ -142,3 +141,12 @@ Authorization: Basic admin admin
 
 DELETE http://localhost:8080/api/v1/internal/games/1
 Content-Type: application/json
+
+
+
+### When anonymous user filters gammes - 200 is returned
+
+GET http://localhost:8080/api/v1/games?tags=Open%20world
+
+###
+GET http://localhost:8080/api/v1/games?priceFrom=70&priceTo=100
