@@ -1,0 +1,144 @@
+### When anonymous user creates new game 401 is returned
+
+POST http://localhost:8080/api/v1/internal/games
+Content-Type: application/json
+
+{
+}
+
+### When admin creates new game with invalid request, 400 is returned and descriptive message is returned
+
+POST http://localhost:8080/api/v1/internal/games
+Content-Type: application/json
+Authorization: Basic admin admin
+
+{
+  "name": "The Witcher 3: Wild Hunt",
+  "developer": "CD Projekt Red",
+  "description": "Example description",
+  "baseGameId": 2,
+  "publisher": "Cd projekt",
+  "releaseDate": "2015-05-19",
+  "avgRating": 0,
+  "basePrice": "60.00",
+  "discountedPrice": null,
+  "discountedUntil": null,
+  "reviewCount": 0,
+  "releaseStatus": "RELEASED",
+  "platforms": [
+    "Pc"
+  ],
+  "tags": [
+    "Open world",
+    "Singleplayer"
+  ],
+  "languages": [
+    "English",
+    "Polish"
+  ],
+  "features": [
+    "Achievements"
+  ],
+  "genres": [
+    "Rpg"
+  ],
+  "reviews": [],
+  "active": false
+}
+
+### When admin creates new game with valid request, 200 is returned and game is created
+
+POST http://localhost:8080/api/v1/internal/games
+Content-Type: application/json
+Authorization: Basic admin admin
+
+{
+  "name": "The Witcher 3: Wild Hunt",
+  "developer": "CD Projekt Red",
+  "description": "Example description",
+  "dlcs": [],
+  "baseGame": null,
+  "publisher": "Cd projekt",
+  "releaseDate": "2015-05-19",
+  "avgRating": 0,
+  "basePrice": "60.00",
+  "discountedPrice": null,
+  "discountedUntil": null,
+  "reviewCount": 0,
+  "releaseStatus": "RELEASED",
+  "platforms": [
+    "Pc"
+  ],
+  "tags": [
+    "Open world",
+    "Singleplayer"
+  ],
+  "languages": [
+    "English",
+    "Polish"
+  ],
+  "features": [
+    "Achievements"
+  ],
+  "genres": [
+    "Rpg"
+  ],
+  "reviews": [],
+  "active": false
+}
+
+### When admin wants to create a game with the same combination of name x developer x release date - 409 is returned
+
+POST http://localhost:8080/api/v1/internal/games
+Content-Type: application/json
+Authorization: Basic admin admin
+
+{
+  "name": "The Witcher 3: Wild Hunt",
+  "developer": "CD Projekt Red",
+  "releaseDate": "2015-05-19",
+  "description": "Example description",
+  "publisher": "CD Projekt"
+}
+
+
+
+### When Admin wants to apply discount and resulting price is greater than base price - 400 is returned
+
+PATCH http://localhost:8080/api/v1/internal/games/1
+Content-Type: application/json
+Authorization: Basic admin admin
+
+{
+  "discountedPrice": "80"
+}
+
+### When Admin wants to patch non existing game - 404 is returned
+
+PATCH http://localhost:8080/api/v1/internal/games/2
+Content-Type: application/json
+Authorization: Basic admin admin
+
+{
+  "name": "Cyberpunk 2077"
+}
+
+### When anonymous user patches game - 401 is returned
+
+PATCH http://localhost:8080/api/v1/internal/games/1
+Content-Type: application/json
+
+{
+"discountedPrice": "80"
+}
+
+### When admin user deletes game - 204 is returned
+
+DELETE http://localhost:8080/api/v1/internal/games/1
+Content-Type: application/json
+Authorization: Basic admin admin
+
+### When anonymous user deletes game - 401 is returned
+
+DELETE http://localhost:8080/api/v1/internal/games/1
+Content-Type: application/json

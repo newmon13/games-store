@@ -5,7 +5,6 @@ import dev.jlipka.recrutly.gamesstore.game.genre.Genre;
 import dev.jlipka.recrutly.gamesstore.game.language.Language;
 import dev.jlipka.recrutly.gamesstore.game.platform.Platform;
 import dev.jlipka.recrutly.gamesstore.game.publisher.Publisher;
-import dev.jlipka.recrutly.gamesstore.game.review.Review;
 import dev.jlipka.recrutly.gamesstore.game.tag.Tag;
 import jakarta.persistence.*;
 
@@ -13,7 +12,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -44,9 +42,6 @@ public class Game {
     private LocalDate releaseDate;
 
     private BigDecimal avgRating = BigDecimal.ZERO;
-
-    @OneToMany(mappedBy = "game")
-    private Set<Review> reviews = new HashSet<>();
 
     private BigDecimal basePrice;
 
@@ -172,14 +167,6 @@ public class Game {
 
     public void setAvgRating(BigDecimal avgRating) {
         this.avgRating = avgRating;
-    }
-
-    public Set<Review> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(Set<Review> reviews) {
-        this.reviews = reviews;
     }
 
     public BigDecimal getBasePrice() {

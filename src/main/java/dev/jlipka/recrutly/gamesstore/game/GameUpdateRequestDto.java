@@ -10,30 +10,32 @@ import java.util.Set;
 
 public class GameUpdateRequestDto {
 
-    @Size(max = 255)
+    @Size(max = 255, message = "Name must be lower than 255 characters")
     private String name;
 
-    @Size(max = 255)
+    @Size(max = 255, message = "Developer must be lower than 255 characters")
     private String developer;
 
-    @Size(max = 8000)
+    @Size(max = 8000, message = "Description must be lower than 8000 characters")
     private String description;
 
     private Long baseGameId;
 
-    @Size(max = 255)
+    @Size(max = 255, message = "Publisher must be lower than 255 characters")
     private String publisher;
 
     private LocalDate releaseDate;
 
-    @PositiveOrZero
+    @PositiveOrZero(message = "Base price must be greater or equal to zero")
     private BigDecimal basePrice;
 
-    @PositiveOrZero
+    @PositiveOrZero(message = "Discount price must be greater or equal to zero")
     private BigDecimal discountedPrice;
 
-    @Future
+    @Future(message = "Discount end date must be in future")
     private LocalDateTime discountedUntil;
+
+    private Boolean isActive;
 
     @Valid
     private Set<@NotBlank(message = "Genre cannot be blank") String> genres;
@@ -120,6 +122,14 @@ public class GameUpdateRequestDto {
 
     public void setDiscountedUntil(LocalDateTime discountedUntil) {
         this.discountedUntil = discountedUntil;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 
     public Set<String> getTags() {
