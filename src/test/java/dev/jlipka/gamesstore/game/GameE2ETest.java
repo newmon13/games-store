@@ -76,11 +76,11 @@
             String filterResponse = mockMvc.perform(get("/api/v1/games")
                             .param("name", "Dummy"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
-                    .andExpect(jsonPath("$[0].name").value("Dummy Game"))
+                    .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))))
+                    .andExpect(jsonPath("$.content[0].name").value("Dummy Game"))
                     .andReturn().getResponse().getContentAsString();
 
-            Long id = objectMapper.readTree(filterResponse).get(0).get("id").asLong();
+            Long id = objectMapper.readTree(filterResponse).get("content").get(0).get("id").asLong();
 
 
             // Step 3: anonymous user fetches game by id
@@ -136,13 +136,13 @@
             // Step 2: anonymous user can browse all games
             mockMvc.perform(get("/api/v1/games"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))));
+                    .andExpect(jsonPath("$.content", hasSize(greaterThanOrEqualTo(1))));
 
             // Step 3: anonymous user can filter games
             mockMvc.perform(get("/api/v1/games")
                             .param("name", "Dummy"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$[0].name").value("Dummy Game"));
+                    .andExpect(jsonPath("$.content[0].name").value("Dummy Game"));
 
             // Step 4: anonymous user can fetch game details by id
             mockMvc.perform(get("/api/v1/games/{id}", id))

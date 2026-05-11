@@ -20,11 +20,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -131,7 +132,7 @@ class GameServiceTest {
 
         when(gameRepository.existsByNameAndDeveloperAndReleaseDate(
                 request.getName(), request.getDeveloper(), request.getReleaseDate())).thenReturn(false);
-        when(publisherService.findOrCreate(request.getPublisher())).thenReturn(publisher);
+        when(publisherService.findOrCreate(anyString())).thenReturn(publisher);
         when(genreService.findOrCreate(anyString())).thenReturn(genre);
         when(platformService.findOrCreate(anyString())).thenReturn(platform);
         when(languageService.findOrCreate(anyString())).thenReturn(language);
@@ -415,15 +416,15 @@ class GameServiceTest {
     void filter_returnsEmptyList_whenNoGamesMatch() {
 
         //given
-        when(gameRepository.findAll(any(Specification.class))).thenReturn(List.of());
+        when(gameRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(Page.empty());
 
         GameFilterDto filterDto = new GameFilterDto();
         filterDto.setName("Nonexistent Game");
 
         //when
-        List<GameListingDto> result = gameService.filter(filterDto);
+        Page<GameListingDto> result = gameService.filter(filterDto, Pageable.unpaged());
 
         //then
-        assertThat(result).isEmpty();
+        assertThat(result.getContent()).isEmpty();
     }
 }
