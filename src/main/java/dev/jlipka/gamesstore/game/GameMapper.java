@@ -39,11 +39,9 @@ public class GameMapper {
         }
         gameFullDetailsDto.setPublisher(game.getPublisher().getName());
         gameFullDetailsDto.setReleaseDate(game.getReleaseDate());
-        gameFullDetailsDto.setAvgRating(game.getAvgRating());
         gameFullDetailsDto.setBasePrice(game.getBasePrice());
         gameFullDetailsDto.setDiscountedPrice(game.getDiscountedPrice());
         gameFullDetailsDto.setDiscountedUntil(game.getDiscountedUntil());
-        gameFullDetailsDto.setReviewCount(game.getReviewCount());
         gameFullDetailsDto.setReleaseStatus(game.getReleaseStatus());
         gameFullDetailsDto.setFeatures(game.getFeatures().stream().map(Feature::getName).collect(Collectors.toSet()));
         gameFullDetailsDto.setTags(game.getTags().stream().map(Tag::getName).collect(Collectors.toSet()));
@@ -72,11 +70,9 @@ public class GameMapper {
         }
         gameAdminFullDetailsDto.setPublisher(game.getPublisher().getName());
         gameAdminFullDetailsDto.setReleaseDate(game.getReleaseDate());
-        gameAdminFullDetailsDto.setAvgRating(game.getAvgRating());
         gameAdminFullDetailsDto.setBasePrice(game.getBasePrice());
         gameAdminFullDetailsDto.setDiscountedPrice(game.getDiscountedPrice());
         gameAdminFullDetailsDto.setDiscountedUntil(game.getDiscountedUntil());
-        gameAdminFullDetailsDto.setReviewCount(game.getReviewCount());
         gameAdminFullDetailsDto.setReleaseStatus(game.getReleaseStatus());
         gameAdminFullDetailsDto.setActive(game.isActive());
         gameAdminFullDetailsDto.setFeatures(game.getFeatures().stream().map(Feature::getName).collect(Collectors.toSet()));
