@@ -14,6 +14,8 @@ import dev.jlipka.gamesstore.game.tag.Tag;
 import dev.jlipka.gamesstore.game.tag.TagService;
 import dev.jlipka.gamesstore.infra.error.ErrorCode;
 import dev.jlipka.gamesstore.infra.error.GamesStoreException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,6 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
 
 import static dev.jlipka.gamesstore.game.GameMapper.*;
@@ -51,13 +52,13 @@ public class GameService {
         this.tagService = tagService;
     }
 
-    public List<GameListingDto> filter(GameFilterDto gameFilterDto) {
-        Specification<Game> gameSpecification = GameSpecification.fromFilter(gameFilterDto);
-        List<Game> games = gameRepository.findAll(gameSpecification);
-
-        return games.stream().filter(Game::isActive).map(GameMapper::mapGameToGameListingItemDto).toList();
+    public Page<GameListingDto> filter(GameFilterDto gameFilterDto, Pageable pageable) {
+        Specification<Game> spec = GameSpecification.fromFilter(gameFilterDto)
+                .and((root, query, cb) -> cb.isTrue(root.get("isActive")));
+        return gameRepository.findAll(spec, pageable).map(GameMapper::mapGameToGameListingItemDto);
     }
 
+    @Transactional
     public GameAdminFullDetailsDto add(GameAddRequestDto request) {
 
         if (gameRepository.existsByNameAndDeveloperAndReleaseDate(request.getName(),
@@ -134,6 +135,7 @@ public class GameService {
         return mapGameToGameAdminFullDetailsDto(save);
     }
 
+    @Transactional
     public GameAdminFullDetailsDto update(GameUpdateRequestDto request, Long id) {
         Optional<Game> byId = gameRepository.findById(id);
 

@@ -41,15 +41,11 @@ public class Game {
 
     private LocalDate releaseDate;
 
-    private BigDecimal avgRating = BigDecimal.ZERO;
-
     private BigDecimal basePrice;
 
     private BigDecimal discountedPrice;
 
     private LocalDateTime discountedUntil;
-
-    private int reviewCount = 0;
 
     private boolean isActive = false;
 
@@ -161,14 +157,6 @@ public class Game {
         this.releaseDate = releaseDate;
     }
 
-    public BigDecimal getAvgRating() {
-        return avgRating;
-    }
-
-    public void setAvgRating(BigDecimal avgRating) {
-        this.avgRating = avgRating;
-    }
-
     public BigDecimal getBasePrice() {
         return basePrice;
     }
@@ -191,14 +179,6 @@ public class Game {
 
     public void setDiscountedUntil(LocalDateTime discountedUntil) {
         this.discountedUntil = discountedUntil;
-    }
-
-    public int getReviewCount() {
-        return reviewCount;
-    }
-
-    public void setReviewCount(int reviewCount) {
-        this.reviewCount = reviewCount;
     }
 
     public boolean isActive() {
